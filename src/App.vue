@@ -1,14 +1,18 @@
 <template>
   <div class="app-wrapper">
-    <h1>Welcome to the project</h1>
-    <Clock></Clock>
+    <Navbar></Navbar>
+    <div id="content-wrapper" class="container-fluid">
+      <router-view></router-view>
+    </div>
   </div>
 </template>
 
 <script>
-import Clock from '@/components/Clock';
+import Navbar from '@/components/Navbar';
+import '@/sass/style.scss';
+
 export default {
-  components: { Clock }
+  components: { Navbar }
 }
 </script>
 
