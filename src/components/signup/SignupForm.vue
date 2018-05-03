@@ -1,7 +1,7 @@
 <template>
   <div class="signup-form-wrapper">
     <div class="mt-4 alert alert-danger" v-show="error">
-      {{ error }}
+      Temporary problems, please try again later
     </div>
     <form @submit.prevent="onSignupFormSubmit">
       <FormGroup>
@@ -34,8 +34,6 @@ import _ from 'lodash';
 import http from '@/lib/http';
 
 const FormGroup = () => import('@/components/common/FormGroup');
-
-let onEmailChangedDebouncedFn;
 
 export default {
   components: { FormGroup },
@@ -71,8 +69,7 @@ export default {
       const vm = this;
       vm.status.email = null;
       http.post('/api/auth/signup', this.signup).then(() => {
-        vm.$router.push({ name: 'home' });
-        // Show a message confirming signup
+        vm.$router.push({ name: 'register-confirm' });
       }).catch(err => {
         vm.error = err;
       });

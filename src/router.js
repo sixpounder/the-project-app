@@ -4,6 +4,8 @@ import Home from './views/Home.vue'
 import About from './views/About.vue'
 import Signup from './views/Signup.vue'
 
+import SignupConfirm from './views/SignupConfirm.vue';
+
 Vue.use(Router)
 
 export default new Router({
@@ -23,6 +25,11 @@ export default new Router({
       path: '/signup',
       name: 'register',
       component: Signup
+    },
+    {
+      path: '/signup/confirm',
+      name: 'register-confirm',
+      component: SignupConfirm
     },
   ]
 })
