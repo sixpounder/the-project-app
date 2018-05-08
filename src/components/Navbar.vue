@@ -22,9 +22,14 @@
         </li> -->
       </ul>
       <ul class="navbar-nav ml-auto">
-        <li class="nav-item active">
+        <li class="nav-item">
           <router-link class="nav-link" :to="{ name: 'register' }">
             Signup
+          </router-link>
+        </li>
+        <li class="nav-item">
+          <router-link class="nav-link" :to="{ name: 'login' }">
+            Login
           </router-link>
         </li>
       </ul>
