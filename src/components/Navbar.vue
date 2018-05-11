@@ -21,7 +21,21 @@
           <a class="nav-link disabled" href="#">Disabled</a>
         </li> -->
       </ul>
-      <ul class="navbar-nav ml-auto">
+      <ul class="navbar-nav ml-auto" v-if="currentUser">
+        <li class="nav-item">
+          <button class="btn btn-primary">
+            <font-awesome-icon icon="cloud-upload-alt"></font-awesome-icon>
+            <span class="ml-2">Upload</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <a href="#" class="nav-link">
+            {{ currentUser.identifier }}
+            <font-awesome-icon icon="chevron-down"></font-awesome-icon>
+          </a>
+        </li>
+      </ul>
+      <ul class="navbar-nav ml-auto" v-else>
         <li class="nav-item">
           <router-link class="nav-link" :to="{ name: 'register' }">
             Signup
@@ -36,3 +50,14 @@
     </div>
   </nav>
 </template>
+
+<script>
+import { mapGetters } from 'vuex';
+
+export default {
+  computed: {
+    ...mapGetters(['currentUser'])
+  }
+}
+</script>
+

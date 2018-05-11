@@ -1,7 +1,7 @@
 <template>
   <div id="login-view" class="container col-12 col-md-8 col-lg-6">
     <h1>Login</h1>
-    <form @submit.prevent="login">
+    <form @submit.prevent="doLogin">
       <FormGroup class="col-12 col-md-8 col-lg-6">
         <label for="email">Email address</label>
         <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email" v-model="credentials.email">
@@ -21,8 +21,9 @@
 </template>
 
 <script>
-import http from '@/lib/http';
 import FormGroup from '@/components/common/FormGroup.vue';
+
+import { mapActions } from 'vuex';
 
 export default {
   data () {
@@ -37,16 +38,18 @@ export default {
   },
 
   methods: {
-    login () {
+    doLogin () {
       const vm = this;
       this.error = null;
-      
-      http.post('/api/auth/login', this.credentials).then(res => {
-        // TODO
+
+      this.login(this.credentials).then(() => {
+        vm.$router.push({ name: 'home' });
       }).catch(err => {
         vm.error = err;
       });
-    }
+    },
+
+    ...mapActions(['login'])
   },
 
   components: { FormGroup }

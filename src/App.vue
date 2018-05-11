@@ -14,11 +14,15 @@ import '@/sass/style.scss';
 
 export default {
   created () {
-    this.ioConnect();
+    const vm = this;
+
+    this.initializeUserContext().then(() => {
+      vm.ioConnect();
+    })
   },
 
   methods: {
-    ...mapActions(['ioConnect'])
+    ...mapActions(['ioConnect', 'initializeUserContext'])
   },
   
   components: { Navbar }
