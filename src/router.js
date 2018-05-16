@@ -4,6 +4,7 @@ import Home from './views/Home.vue'
 import About from './views/About.vue'
 import Signup from './views/Signup.vue'
 import Login from './views/Login.vue'
+import Upload from './views/Upload.vue'
 
 import SignupConfirm from './views/SignupConfirm.vue';
 
@@ -31,6 +32,11 @@ export default new Router({
       path: '/login',
       name: 'login',
       component: Login
+    },
+    {
+      path: '/upload',
+      name: 'upload',
+      component: Upload
     },
     {
       path: '/signup/confirm',

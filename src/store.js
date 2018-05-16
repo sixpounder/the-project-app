@@ -8,7 +8,8 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     socket: null,
-    user: null
+    user: undefined,
+    contextInitialized: false
   },
   mutations: {
     setSocket (state, instance) {
@@ -38,7 +39,11 @@ export default new Vuex.Store({
 
     initializeUserContext (context) {
       return http.get('/api/auth/me').then(res => {
-        context.commit('setCurrentUser', res.data.user);
+        context.commit('setCurrentUser', res.data ? res.data.user : null);
+        context.state.contextInitialized = true;
+      }).catch(() => {
+        context.commit('setCurrentUser', null);
+        context.state.contextInitialized = true;
       });
     },
 
@@ -57,6 +62,10 @@ export default new Vuex.Store({
 
     currentUser (state) {
       return state.user;
+    },
+
+    contextInitialized (state) {
+      return state.contextInitialized;
     }
   }
 })

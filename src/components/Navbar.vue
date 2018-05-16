@@ -23,10 +23,10 @@
       </ul>
       <ul class="navbar-nav ml-auto" v-if="currentUser">
         <li class="nav-item">
-          <button class="btn btn-primary">
+          <router-link :to="{ name: 'upload' }" class="btn btn-primary">
             <font-awesome-icon icon="cloud-upload-alt"></font-awesome-icon>
             <span class="ml-2">Upload</span>
-          </button>
+          </router-link>
         </li>
         <li class="nav-item">
           <a href="#" class="nav-link">
