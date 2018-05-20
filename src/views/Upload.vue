@@ -76,7 +76,7 @@ export default {
 
     onUploadCompleted () {
       // TODO: navigate to clip page
-      this.$router.push({ name: 'view-clip' });
+      this.$router.push({ name: 'stream' });
     },
 
     onFormSubmit () {

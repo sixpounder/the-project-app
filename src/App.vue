@@ -18,7 +18,7 @@ import '@/sass/style.scss';
 export default {
   methods: {
     userContextReady () {
-      this.ioConnect();
+      // this.ioConnect();
     },
 
     ...mapActions(['ioConnect', 'initializeUserContext'])

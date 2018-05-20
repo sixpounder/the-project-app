@@ -5,6 +5,7 @@ import About from './views/About.vue'
 import Signup from './views/Signup.vue'
 import Login from './views/Login.vue'
 import Upload from './views/Upload.vue'
+import Stream from './views/Stream.vue'
 
 import SignupConfirm from './views/SignupConfirm.vue';
 
@@ -37,6 +38,11 @@ export default new Router({
       path: '/upload',
       name: 'upload',
       component: Upload
+    },
+    {
+      path: '/stream/:id/:stream?',
+      name: 'stream',
+      component: Stream
     },
     {
       path: '/signup/confirm',

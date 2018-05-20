@@ -1,19 +1,23 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import Socket from 'socket.io-client/dist/socket.io.js';
 import http from '@/lib/http';
 
-Vue.use(Vuex)
+Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    socket: null,
+    videoSocket: null,
+    chatSocket: null,
     user: undefined,
     contextInitialized: false
   },
   mutations: {
-    setSocket (state, instance) {
-      state.socket = instance;
+    setVideoSocket (state, instance) {
+      state.videoSocket = instance;
+    },
+
+    setChatSocket (state, instance) {
+      state.chatSocket = instance;
     },
 
     setCurrentUser (state, user) {
@@ -21,21 +25,6 @@ export default new Vuex.Store({
     }
   },
   actions: {
-    ioConnect (context) {
-      let instance = Socket('http://localhost:3000');
-      instance.on('connected', function() {
-        console.info('Websocket connected!');
-        // TODO: set auth token to identify user on subsequent requests via socket
-      }).on('disconnected', () => {
-        // TODO
-      }).on('authenticated', () => {
-        console.log('Websocket authenticated');
-      }).on('forbidden', () => {
-        console.log('Could not authenticate via websocket');
-      });
-
-      context.commit('setSocket', instance);
-    },
 
     initializeUserContext (context) {
       return http.get('/api/auth/me').then(res => {
@@ -56,8 +45,12 @@ export default new Vuex.Store({
     }
   },
   getters: {
-    socket (state) {
-      return state.socket;
+    videoSocket (state) {
+      return state.videoSocket
+    },
+
+    chatSocket (state) {
+      return state.chatSocket
     },
 
     currentUser (state) {
