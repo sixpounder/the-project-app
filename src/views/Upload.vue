@@ -28,7 +28,7 @@
         <h1>
           <font-awesome-icon icon="circle-notch" spin></font-awesome-icon>
         </h1>
-        <h5>Our monkeys are uploading and converting your video</h5>
+        <h5>Our monkeys are uploading your video</h5>
         <h3>{{ progress.sentPercentage }}%</h3>
       </div>
     </div>

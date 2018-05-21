@@ -58,7 +58,7 @@ export default {
       vm.source.addEventListener('sourceopen', () => {
         vm.$refs.videoplayer.pause();
 
-        const mediaBuffer = vm.source.addSourceBuffer('video/mp4; codecs="avc1.64001E"');
+        const mediaBuffer = vm.source.addSourceBuffer('video/webm; codecs="vorbis,vp8"');
         
         mediaBuffer.addEventListener('update', () => {
           console.log('updating');
@@ -70,14 +70,14 @@ export default {
 
         // vm.$refs.videoplayer.play();
 
-        vm.videoChannel.on('stream', (data, encoding) => {
+        vm.videoChannel.on('stream', (data) => {
           
           const uIntArray = new Uint8Array(data);
 
           if (mediaBuffer.updating || vm.bufferQueue.length > 0) {
-            vm.bufferQueue.push(data);
+            vm.bufferQueue.push(uIntArray);
           } else {
-            mediaBuffer.appendBuffer(data);
+            mediaBuffer.appendBuffer(uIntArray);
           }
         });
 
