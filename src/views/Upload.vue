@@ -74,9 +74,9 @@ export default {
 
     },
 
-    onUploadCompleted () {
+    onUploadCompleted (clip) {
       // TODO: navigate to clip page
-      this.$router.push({ name: 'stream' });
+      this.$router.push({ name: 'stream', params: { id: clip.uuid } });
     },
 
     onFormSubmit () {
@@ -98,7 +98,7 @@ export default {
         },
       }).then(res => {
         vm.progress.sentPercentage = null;
-        vm.onUploadCompleted(res);
+        vm.onUploadCompleted(res.data);
       }).catch(err => {
         console.error(err);
         // TODO: notify user about occurred error
