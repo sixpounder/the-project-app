@@ -39,7 +39,7 @@ export default new Vuex.Store({
     login (context, credentials) {
       return http.post('/api/auth/login', credentials).then(res => {
         context.commit('setCurrentUser', res.data);
-        context.state.socket.emit('authenticate', context.state.user.id);
+        // context.state.socket.emit('authenticate', context.state.user.id);
         return res.data;
       });
     }

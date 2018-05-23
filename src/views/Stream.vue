@@ -26,6 +26,12 @@ export default {
     };
   },
 
+  mounted () {
+    if (! MediaSource.isTypeSupported('video/mp4; codecs="avc1.42E01E, mp4a.40.2"')) {
+      console.error('Unsupported codec');
+    }
+  },
+
   beforeRouteEnter (to, from, next) {
     next(vm => {
       vm.init(to, from);
@@ -52,41 +58,76 @@ export default {
 
     playback () {
       const vm = this;
+      
+      let mediaBuffer, bcount = 0;
+      
+      vm.$refs.videoplayer.pause();
 
       vm.$refs.videoplayer.src = URL.createObjectURL(this.source);
+      
+      vm.videoChannel.on('stream', (data, encoding) => {
+        const uIntArray = new Uint8Array(data);
+        bcount += uIntArray.length;
+        console.log('Received ' + encoding + ' of ' + uIntArray.length + 'bytes');
+
+        if (mediaBuffer.updating) {
+          console.info('push into queue');
+          vm.bufferQueue.push(uIntArray);
+        } else {
+          console.info('append');
+          mediaBuffer.appendBuffer(uIntArray);
+        }
+
+        vm.videoChannel.emit('ack', { li: bcount });
+
+      });
+
+      vm.videoChannel.on('stream-end', () => {
+        console.log('end received');
+        vm.source.endOfStream();
+        vm.$refs.videoplayer.play();
+      });
 
       vm.source.addEventListener('sourceopen', () => {
-        vm.$refs.videoplayer.pause();
 
-        const mediaBuffer = vm.source.addSourceBuffer('video/webm; codecs="vorbis,vp8"');
+        mediaBuffer = vm.source.addSourceBuffer('video/mp4; codecs="avc1.42E01E, mp4a.40.2"');
         
         mediaBuffer.addEventListener('update', () => {
-          console.log('updating');
+          console.info('updating');
+        });
+
+        vm.source.addEventListener('updateend', () => {
+          console.info('Updated');
           if (vm.bufferQueue.length > 0 && !mediaBuffer.updating) {
-            mediaBuffer.appendBuffer(vm.bufferQueue.shift());
+            console.info('append from queue');
+            mediaBuffer.appendStream(vm.bufferQueue.shift());
           }
+          vm.$refs.videoplayer.play();
         });
-        
 
+        // vm.source.addEventListener('sourceended', (e) => {
+        //   console.info('END');
+        //   console.warn(e);
+        // });
         // vm.$refs.videoplayer.play();
-
-        vm.videoChannel.on('stream', (data) => {
-          
-          const uIntArray = new Uint8Array(data);
-
-          if (mediaBuffer.updating || vm.bufferQueue.length > 0) {
-            vm.bufferQueue.push(uIntArray);
-          } else {
-            mediaBuffer.appendBuffer(uIntArray);
-          }
-        });
-
-        vm.videoChannel.on('end-stream', () => {
-          vm.source.endOfStream();
-        });
 
         // TODO: on pause, seek and other video events notify the server
       }, false);
+
+      vm.source.addEventListener('sourceclose', (e) => {
+          console.info('CLOSED');
+          console.warn(e);
+        });
+
+        vm.source.addEventListener('sourceended', (e) => {
+          console.info('END');
+          console.warn(e);
+        });
+
+        vm.source.addEventListener('error', (e) => {
+          console.info('ERROR');
+          console.warn(e);
+        });
     },
 
     purgeConnections () {
@@ -125,7 +166,7 @@ export default {
         
       });
 
-      this.videoChannel.on('joined-stream-room', () => {
+      this.videoChannel.on('joined-stream-room', (room) => {
         vm.playback();
       });
 
