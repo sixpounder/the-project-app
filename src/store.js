@@ -9,7 +9,6 @@ export default new Vuex.Store({
   state: {
     videoChannel: null,
     chatChannel: null,
-    chatSocket: null,
     user: undefined,
     contextInitialized: false
   },
@@ -24,6 +23,17 @@ export default new Vuex.Store({
 
     setCurrentUser (state, user) {
       state.user = user;
+    },
+
+    ioConnect (state) {
+      state.videoChannel = io('http://localhost:3000/video', {
+        transports: ['websocket']
+      });
+
+      state.chatChannel = io('http://localhost:3000/chat', {
+        transports: ['websocket'],
+        path: '/chat'
+      });
     }
   },
   actions: {
@@ -31,7 +41,6 @@ export default new Vuex.Store({
     initializeUserContext (context) {
       return http.get('/api/auth/me').then(res => {
         context.commit('setCurrentUser', res.data ? res.data.user : null);
-        context.state.videoChannel.emit('authenticate', context.state.user.id);
         context.state.contextInitialized = true;
       }).catch(() => {
         context.commit('setCurrentUser', null);
@@ -47,15 +56,11 @@ export default new Vuex.Store({
       });
     },
 
-    ioConnect ({ state }) {
-      state.videoChannel = io('http://localhost:3000/video', {
-        transports: ['websocket']
-      });
-
-      state.chatChannel = io('http://localhost:3000/chat', {
-        transports: ['websocket'],
-        path: '/chat'
-      });
+    ioConnect ({ commit, state }) {
+      commit('ioConnect');
+      if (state.user !== null) {
+        state.videoChannel.emit('authenticate', state.user.id);
+      }
     }
   },
   getters: {
