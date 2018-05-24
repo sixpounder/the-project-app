@@ -3,8 +3,7 @@
     <div class="container-fluid mt-4">
       <div class="row content">
         <div class="col-md-8 col-12">
-          <video class="videoplayer" v-if="currentUserIsStreamMaster" controls ref="videoplayer"></video>
-          <video class="videoplayer" v-else ref="videoplayer"></video>
+          <VideoPlayer v-if="videoSource" :source="videoSource" :controls="currentUserIsStreamMaster" @seek="playerSeek" @play="playerPlay" @pause="playerPause"></VideoPlayer>
         </div>
         <div class="col-md-4 col-12">
           chat here
@@ -57,8 +56,6 @@ export default {
     playback () {
       const vm = this;
 
-      vm.$refs.videoplayer.src = `http://localhost:3000/api/streaming/channels/stream/${vm.clipUUID}/${vm.channelInfo._channelId}`;
-
       vm.videoChannel.emit('join-stream-room', this.room);
 
       vm.videoChannel.on('joined-stream-room', (room, amITheMaster) => {
@@ -70,6 +67,19 @@ export default {
           vm.$refs.videoplayer.addEventListener('timeupdate', () => {
             vm.videoChannel.emit('timeupdate', vm.room, vm.$refs.videoplayer.currentTime);
           });
+
+          vm.$refs.videoplayer.addEventListener('seeked', () => {
+            vm.videoChannel.emit('seeked', vm.room, vm.$refs.videoplayer.currentTime);
+          });
+
+          vm.$refs.videoplayer.addEventListener('pause', () => {
+            vm.videoChannel.emit('pause', vm.room);
+          });
+
+          vm.$refs.videoplayer.addEventListener('play', () => {
+            vm.videoChannel.emit('play', vm.room);
+          });
+
           vm.$refs.videoplayer.play();
         } else {
           vm.videoChannel.on('sync', (syncpoint) => {
@@ -114,6 +124,10 @@ export default {
   computed: {
     currentUserIsStreamMaster () {
       return this.clientIsMaster;
+    },
+
+    videoSource () {
+      return this.channelInfo && this.clipUUID ? `http://localhost:3000/api/streaming/channels/stream/${this.clipUUID}/${this.channelInfo._channelId}` : null;
     },
 
     room () {
