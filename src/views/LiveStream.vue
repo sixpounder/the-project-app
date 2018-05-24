@@ -26,7 +26,6 @@ const ChannelChat = () => import('@/components/chat/ChannelChat');
 export default {
   data () {
     return {
-      clipUUID: null,
       channelInfo: null,
       channelInfoError: null,
       socketRoomName: null,
@@ -162,6 +161,10 @@ export default {
 
     playable () {
       return this.channelInfo && this.playerInstance;
+    },
+
+    clipUUID () {
+      return this.channelInfo && this.channelInfo.clip ? this.channelInfo.clip.uuid : null;
     },
 
     ...mapGetters(['currentUser', 'videoChannel', 'chatChannel', 'apiHost'])

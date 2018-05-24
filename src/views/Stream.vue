@@ -142,7 +142,7 @@ export default {
       const vm = this;
       // this.socketRoomName = null; // TODO: this should be fetched alongside clip infos BEFORE joining
       
-      this.videoChannel = io('http://localhost:3000', {
+      this.videoChannel = io(this.apiHost, {
         transports: ['websocket'],
         path: '/video'
       });
@@ -166,7 +166,7 @@ export default {
         
       });
 
-      this.videoChannel.on('joined-stream-room', (room) => {
+      this.videoChannel.on('joined-stream-room', () => {
         vm.playback();
       });
 
@@ -194,7 +194,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['currentUser'])
+    ...mapGetters(['currentUser', 'apiHost'])
   }
 }
 </script>

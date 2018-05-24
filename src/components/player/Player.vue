@@ -1,20 +1,15 @@
 <template>
   <div class="player" v-if="source">
     <video :src="source" class="videoplayer" ref="videoplayer"></video>
-    <div class="controls d-flex" v-if="$refs.videoplayer && controllable">
-      <button class="btn btn-primary" v-if="playerState === 'paused'" @click="play">Play</button>
-      <button class="btn btn-primary" v-if="playerState === 'playing'" @click="pause">Pause</button>
-      <progress :value="progressPercentage" :max="100"></progress>
-      <span class="timer">{{ timeElapsed }} / {{ totalTime }}</span>
-    </div>
   </div>
 </template>
 
 <script>
 import moment from 'moment';
+// import hls from 'hls.js';
 
 export default {
-  props: ['source', 'controllable'],
+  props: ['source'],
   
   data () {
     return {
@@ -30,7 +25,6 @@ export default {
     this.$refs.videoplayer.addEventListener('timeupdate', this.onTimeUpdate);
     this.$refs.videoplayer.addEventListener('play', this.onPlayerStateChanged);
     this.$refs.videoplayer.addEventListener('pause', this.onPlayerStateChanged);
-    this.$refs.videoplayer.addEventListener('seekend', this.onSeek);
   },
 
   beforeDestroy () {
@@ -38,14 +32,9 @@ export default {
     this.$refs.videoplayer.removeEventListener('timeupdate', this.onTimeUpdate);
     this.$refs.videoplayer.removeEventListener('play', this.onPlayerStateChanged);
     this.$refs.videoplayer.removeEventListener('pause', this.onPlayerStateChanged);
-    this.$refs.videoplayer.removeEventListener('seekend', this.onSeek);
   },
 
   methods: {
-    onSeek () {
-      this.$emit('seek', this.$refs.videoplayer.currentTime);
-    },
-
     onPlayerStateChanged () {
       this.playerState = this.$refs.videoplayer.paused ? 'paused' : 'playing';
     },

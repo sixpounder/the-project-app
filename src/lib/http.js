@@ -1,7 +1,8 @@
 import axios from 'axios';
+import hosts from '@/hosts';
 
 const instance = axios.create({
-  baseURL: 'http://localhost:3000',
+  baseURL: hosts.apiHost,
   withCredentials: true,
   headers: { 'X-Requested-With': 'XMLHttpRequest' }
 });

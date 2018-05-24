@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import http from '@/lib/http';
 import io from 'socket.io-client';
+import hosts from '@/hosts';
 
 Vue.use(Vuex);
 
@@ -26,11 +27,11 @@ export default new Vuex.Store({
     },
 
     ioConnect (state) {
-      state.videoChannel = io('http://localhost:3000/video', {
+      state.videoChannel = io(`${hosts.apiHost}/video`, {
         transports: ['websocket']
       });
 
-      state.chatChannel = io('http://localhost:3000/chat', {
+      state.chatChannel = io(`${hosts.apiHost}/chat`, {
         transports: ['websocket'],
         path: '/chat'
       });
@@ -86,6 +87,10 @@ export default new Vuex.Store({
 
     chatChannel (state) {
       return state.chatChannel;
+    },
+
+    apiHost () {
+      return hosts.apiHost;
     }
   }
 })
