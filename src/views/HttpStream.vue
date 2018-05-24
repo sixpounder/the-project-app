@@ -1,12 +1,15 @@
 <template>
   <div id="stream-view">
     <div class="container-fluid mt-4">
-      <div class="row content">
+      <div v-if="channelInfoError" class="alert alert-danger">
+        This channel does not exist. Sorry about that.
+      </div>
+      <div class="row content" v-if="channelInfo">
         <div class="col-md-8 col-12">
-          <VideoPlayer v-if="videoSource" :source="videoSource" :controls="currentUserIsStreamMaster" @seek="playerSeek" @play="playerPlay" @pause="playerPause"></VideoPlayer>
+          <VideoPlayer v-if="videoSource" :source="videoSource" :controllable="currentUserIsStreamMaster" @seek="playerSeek" @play="playerPlay" @pause="playerPause" @created="playerInstanceReady"></VideoPlayer>
         </div>
         <div class="col-md-4 col-12">
-          chat here
+          <ChannelChat v-if="channelInfo" :channel="channelInfo._channelId" :via="chatChannel"></ChannelChat>
         </div>
       </div>
     </div>
@@ -17,6 +20,9 @@
 import http from '@/lib/http';
 import { mapGetters } from 'vuex';
 
+const VideoPlayer = () => import('@/components/player/Player');
+const ChannelChat = () => import('@/components/chat/ChannelChat');
+
 export default {
   data () {
     return {
@@ -24,7 +30,8 @@ export default {
       channelInfo: null,
       channelInfoError: null,
       socketRoomName: null,
-      clientIsMaster: false
+      clientIsMaster: false,
+      playerInstance: null
     };
   },
 
@@ -48,9 +55,8 @@ export default {
   },
 
   methods: {
-
-    stopPlayback () {
-      this.$refs.videoplayer.stop();
+    playerInstanceReady (instance) {
+      this.playerInstance = instance;
     },
 
     playback () {
@@ -63,32 +69,37 @@ export default {
         vm.clientIsMaster = amITheMaster;
         
         if (vm.currentUserIsStreamMaster) {
+          vm.playerInstance.play();
           // Register listeners on video player
-          vm.$refs.videoplayer.addEventListener('timeupdate', () => {
-            vm.videoChannel.emit('timeupdate', vm.room, vm.$refs.videoplayer.currentTime);
-          });
+          // vm.$refs.videoplayer.addEventListener('timeupdate', () => {
+          //   vm.videoChannel.emit('timeupdate', vm.room, vm.$refs.videoplayer.currentTime);
+          // });
 
-          vm.$refs.videoplayer.addEventListener('seeked', () => {
-            vm.videoChannel.emit('seeked', vm.room, vm.$refs.videoplayer.currentTime);
-          });
+          // vm.$refs.videoplayer.addEventListener('seeked', () => {
+          //   vm.videoChannel.emit('seeked', vm.room, vm.$refs.videoplayer.currentTime);
+          // });
 
-          vm.$refs.videoplayer.addEventListener('pause', () => {
-            vm.videoChannel.emit('pause', vm.room);
-          });
+          // vm.$refs.videoplayer.addEventListener('pause', () => {
+          //   vm.videoChannel.emit('pause', vm.room);
+          // });
 
-          vm.$refs.videoplayer.addEventListener('play', () => {
-            vm.videoChannel.emit('play', vm.room);
-          });
+          // vm.$refs.videoplayer.addEventListener('play', () => {
+          //   vm.videoChannel.emit('play', vm.room);
+          // });
 
-          vm.$refs.videoplayer.play();
+          // vm.$refs.videoplayer.play();
         } else {
-          vm.videoChannel.on('sync', (syncpoint) => {
-            vm.$refs.videoplayer.currentTime = syncpoint;
-            vm.$refs.videoplayer.play();
-          });
-
           vm.videoChannel.emit('sync', vm.room);
         }
+
+        vm.videoChannel.on('sync', (syncpoint) => {
+          vm.playerInstance.currentTime = syncpoint;
+          vm.playerInstance.play();
+        });
+
+        vm.videoChannel.on('becomes-master', () => {
+          vm.clientIsMaster = true;
+        });
       });
     },
 
@@ -109,7 +120,10 @@ export default {
         } else {
           vm.channelInfo = res.data;
           vm.clipUUID = clipUUID;
-          vm.playback();
+          
+          vm.$nextTick(() => {
+            vm.playback();
+          });
         }
       }).catch(err => {
         vm.channelInfoError = err;
@@ -118,7 +132,19 @@ export default {
       if (next) {
         next();
       }
-    }
+    },
+
+    playerPlay () {
+      this.videoChannel.emit('play', this.room);
+    },
+
+    playerPause () {
+      this.videoChannel.emit('pause', this.room);
+    },
+
+    playerSeek () {
+      this.videoChannel.emit('seeked', this.room, this.playerInstance.currentTime);
+    },
   },
 
   computed: {
@@ -134,8 +160,14 @@ export default {
       return this.channelInfo._channelId;
     },
 
+    playable () {
+      return this.channelInfo && this.playerInstance;
+    },
+
     ...mapGetters(['currentUser', 'videoChannel', 'chatChannel'])
-  }
+  },
+
+  components: { ChannelChat, VideoPlayer }
 }
 </script>
 
