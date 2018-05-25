@@ -4,7 +4,7 @@
       <div v-if="channelInfoError" class="alert alert-danger">
         This channel does not exist. Sorry about that.
       </div>
-      <div class="row content" v-if="channelInfo">
+      <div class="row content">
         <div class="col-md-8 col-12">
           <VideoPlayer v-if="videoSource" :source="videoSource" :controllable="currentUserIsStreamMaster" @seek="playerSeek" @play="playerPlay" @pause="playerPause" @created="playerInstanceReady"></VideoPlayer>
         </div>
@@ -30,7 +30,9 @@ export default {
       channelInfoError: null,
       socketRoomName: null,
       clientIsMaster: false,
-      playerInstance: null
+      playerInstance: null,
+      clipUUID: null,
+      streamId: null
     };
   },
 
@@ -58,50 +60,6 @@ export default {
       this.playerInstance = instance;
     },
 
-    playback () {
-      const vm = this;
-
-      vm.videoChannel.emit('join-stream-room', this.room);
-
-      vm.videoChannel.on('joined-stream-room', (room, amITheMaster) => {
-        vm.socketRoomName = room;
-        vm.clientIsMaster = amITheMaster;
-        
-        if (vm.currentUserIsStreamMaster) {
-          vm.playerInstance.play();
-          // Register listeners on video player
-          // vm.$refs.videoplayer.addEventListener('timeupdate', () => {
-          //   vm.videoChannel.emit('timeupdate', vm.room, vm.$refs.videoplayer.currentTime);
-          // });
-
-          // vm.$refs.videoplayer.addEventListener('seeked', () => {
-          //   vm.videoChannel.emit('seeked', vm.room, vm.$refs.videoplayer.currentTime);
-          // });
-
-          // vm.$refs.videoplayer.addEventListener('pause', () => {
-          //   vm.videoChannel.emit('pause', vm.room);
-          // });
-
-          // vm.$refs.videoplayer.addEventListener('play', () => {
-          //   vm.videoChannel.emit('play', vm.room);
-          // });
-
-          // vm.$refs.videoplayer.play();
-        } else {
-          vm.videoChannel.emit('sync', vm.room);
-        }
-
-        vm.videoChannel.on('sync', (syncpoint) => {
-          vm.playerInstance.currentTime = syncpoint;
-          vm.playerInstance.play();
-        });
-
-        vm.videoChannel.on('becomes-master', () => {
-          vm.clientIsMaster = true;
-        });
-      });
-    },
-
     purgeConnections () {
       if(this.videoSocket) {
         this.videoChannel.emit('leave-stream-room', this.room);
@@ -110,23 +68,20 @@ export default {
 
     init (to, from, next) {
       const vm = this;
-      const clipUUID = to.params.id;
-      const streamId = to.params.stream;
+      this.clipUUID = to.params.id;
+      this.streamId = to.params.stream;
 
-      http.get(`/api/streaming/channels/${clipUUID}${streamId ? '/' + streamId : ''}`).then(res => {
-        if (!streamId) {
-          vm.$router.replace({ name: 'stream', params: { id: clipUUID, stream: res.data._channelId} });
-        } else {
-          vm.channelInfo = res.data;
-          vm.clipUUID = clipUUID;
-          
-          vm.$nextTick(() => {
-            vm.playback();
-          });
-        }
-      }).catch(err => {
-        vm.channelInfoError = err;
-      });
+      if (! this.streamId) {
+        // Create the stream
+        http.post(`/api/streaming/channels/${vm.clipUUID}`).then(res => {
+          const newStreamId = res.data.streamId;
+          vm.$router.replace({ name: 'stream', params: { id: vm.clipUUID, stream: newStreamId }});
+        }).catch(err => {
+          vm.channelInfoError = err;
+        });
+      } else {
+        // Just connect to it
+      }
 
       if (next) {
         next();
@@ -152,7 +107,7 @@ export default {
     },
 
     videoSource () {
-      return this.channelInfo && this.clipUUID ? `${this.apiHost}/api/streaming/channels/stream/${this.clipUUID}/${this.channelInfo._channelId}` : null;
+      return this.clipUUID && this.streamId ? `${this.apiHost}/api/streaming/channels/${this.clipUUID}/${this.streamId}` : null;
     },
 
     room () {
@@ -161,10 +116,6 @@ export default {
 
     playable () {
       return this.channelInfo && this.playerInstance;
-    },
-
-    clipUUID () {
-      return this.channelInfo && this.channelInfo.clip ? this.channelInfo.clip.uuid : null;
     },
 
     ...mapGetters(['currentUser', 'videoChannel', 'chatChannel', 'apiHost'])

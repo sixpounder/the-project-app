@@ -1,12 +1,12 @@
 <template>
   <div class="player" v-if="source">
-    <video :src="source" class="videoplayer" ref="videoplayer"></video>
+    <video class="videoplayer" controls ref="videoplayer"></video>
   </div>
 </template>
 
 <script>
 import moment from 'moment';
-// import hls from 'hls.js';
+import Hls from 'hls.js';
 
 export default {
   props: ['source'],
@@ -25,6 +25,15 @@ export default {
     this.$refs.videoplayer.addEventListener('timeupdate', this.onTimeUpdate);
     this.$refs.videoplayer.addEventListener('play', this.onPlayerStateChanged);
     this.$refs.videoplayer.addEventListener('pause', this.onPlayerStateChanged);
+
+    if(Hls.isSupported()) {
+      var hls = new Hls();
+      hls.loadSource(this.source);
+      hls.attachMedia(this.$refs.videoplayer);
+      hls.on(Hls.Events.MANIFEST_PARSED,function() {
+        this.$refs.videoplayer.play();
+      });
+    }
   },
 
   beforeDestroy () {
