@@ -19,6 +19,7 @@
 <script>
 import http from '@/lib/http';
 import { mapGetters } from 'vuex';
+import Hls from 'hls.js';
 
 const VideoPlayer = () => import('@/components/player/Player');
 const ChannelChat = () => import('@/components/chat/ChannelChat');
@@ -107,7 +108,7 @@ export default {
     },
 
     videoSource () {
-      return this.clipUUID && this.streamId ? `${this.apiHost}/api/streaming/channels/${this.clipUUID}/${this.streamId}` : null;
+      return this.clipUUID && this.streamId ? `${this.apiHost}/api/streaming/channels/${this.clipUUID}/manifest.m3u8` : null;
     },
 
     room () {
