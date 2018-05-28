@@ -3,9 +3,19 @@
     <div class="container-fluid mt-4">
       <div class="row content">
         <div class="col-md-8 col-12">
-          <VideoPlayer v-if="videoSource" :source="videoSource" :controllable="currentUserIsStreamMaster" @created="playerInstanceReady"></VideoPlayer>
+          <VideoPlayer v-if="videoSource" :source="videoSource" @created="playerInstanceReady"></VideoPlayer>
         </div>
         <div class="col-md-4 col-12">
+          <div class="text-center" v-if="chatConnecting">
+            <font-awesome-icon icon="circle-notch" spin></font-awesome-icon>
+            <span class="ml-2">Connecting to channel chat</span>
+          </div>
+
+          <div class="text-center" v-if="chatDisconnected">
+            <font-awesome-icon icon="frown" spin></font-awesome-icon>
+            <span class="ml-2">Disconnected from channel chat</span>
+          </div>
+
           <ChannelChat v-if="chatConnected" :channel="streamId" :via="chatIo"></ChannelChat>
         </div>
       </div>
@@ -31,7 +41,7 @@ export default {
       streamEnded: false,
       videoIo: null,
       chatIo: null,
-      chatConnected: false
+      chatStatus: 'connecting'
     };
   },
 
@@ -97,9 +107,11 @@ export default {
         });
 
         this.chatIo.on('connect', () => {
-          vm.chatConnected = true;
+          vm.chatStatus = 'connected';
+        }).on('connecting', () => {
+          vm.chatStatus = 'connecting';
         }).on('disconnect', () => {
-          vm.chatConnected = false;
+          vm.chatStatus = 'disconnected';
         });
 
         if (next) {
@@ -110,8 +122,17 @@ export default {
   },
 
   computed: {
-    currentUserIsStreamMaster () {
-      return this.clientIsMaster;
+    
+    chatConnected () {
+      return this.chatStatus === 'connected';
+    },
+
+    chatConnecting () {
+      return this.chatStatus === 'connecting';
+    },
+
+    chatDisconnected () {
+      return this.chatStatus === 'disconnected';
     },
 
     videoSource () {

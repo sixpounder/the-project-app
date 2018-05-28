@@ -1,6 +1,6 @@
 <template>
   <div class="player" v-if="source">
-    <video class="videoplayer" ref="videoplayer"></video>
+    <video autoplay="true" class="videoplayer" ref="videoplayer"></video>
   </div>
 </template>
 
@@ -21,29 +21,30 @@ export default {
   },
 
   mounted () {
-    this.$refs.videoplayer.addEventListener('durationchange', this.onDurationChange);
-    this.$refs.videoplayer.addEventListener('timeupdate', this.onTimeUpdate);
-    this.$refs.videoplayer.addEventListener('play', this.onPlayerStateChanged);
-    this.$refs.videoplayer.addEventListener('pause', this.onPlayerStateChanged);
+    // this.$refs.videoplayer.addEventListener('durationchange', this.onDurationChange);
+    // this.$refs.videoplayer.addEventListener('timeupdate', this.onTimeUpdate);
+    // this.$refs.videoplayer.addEventListener('play', this.onPlayerStateChanged);
+    // this.$refs.videoplayer.addEventListener('pause', this.onPlayerStateChanged);
 
+    const vm = this;
     if(Hls.isSupported()) {
       const hls = new Hls({
         manifestLoadingTimeOut: 30000
       });
       hls.loadSource(this.source);
       hls.attachMedia(this.$refs.videoplayer);
-      hls.on(Hls.Events.MANIFEST_PARSED,function() {
-        this.$refs.videoplayer.play();
+      hls.on(Hls.Events.MANIFEST_PARSED, function() {
+        vm.$refs.videoplayer.play();
       });
     }
   },
 
-  beforeDestroy () {
-    this.$refs.videoplayer.removeEventListener('durationchange', this.onDurationChange);
-    this.$refs.videoplayer.removeEventListener('timeupdate', this.onTimeUpdate);
-    this.$refs.videoplayer.removeEventListener('play', this.onPlayerStateChanged);
-    this.$refs.videoplayer.removeEventListener('pause', this.onPlayerStateChanged);
-  },
+  // beforeDestroy () {
+  //   this.$refs.videoplayer.removeEventListener('durationchange', this.onDurationChange);
+  //   this.$refs.videoplayer.removeEventListener('timeupdate', this.onTimeUpdate);
+  //   this.$refs.videoplayer.removeEventListener('play', this.onPlayerStateChanged);
+  //   this.$refs.videoplayer.removeEventListener('pause', this.onPlayerStateChanged);
+  // },
 
   methods: {
     onPlayerStateChanged () {
