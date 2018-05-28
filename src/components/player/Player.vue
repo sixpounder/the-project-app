@@ -27,6 +27,7 @@ export default {
     this.$refs.videoplayer.addEventListener('pause', this.onPlayerStateChanged);
 
     if(Hls.isSupported()) {
+      const hls = new Hls();
       hls.loadSource(this.source);
       hls.attachMedia(this.$refs.videoplayer);
       hls.on(Hls.Events.MANIFEST_PARSED,function() {
