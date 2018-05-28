@@ -1,6 +1,6 @@
 <template>
   <div class="player" v-if="source">
-    <video class="videoplayer" controls ref="videoplayer"></video>
+    <video class="videoplayer" ref="videoplayer"></video>
   </div>
 </template>
 
@@ -27,7 +27,9 @@ export default {
     this.$refs.videoplayer.addEventListener('pause', this.onPlayerStateChanged);
 
     if(Hls.isSupported()) {
-      const hls = new Hls();
+      const hls = new Hls({
+        manifestLoadingTimeOut: 30000
+      });
       hls.loadSource(this.source);
       hls.attachMedia(this.$refs.videoplayer);
       hls.on(Hls.Events.MANIFEST_PARSED,function() {

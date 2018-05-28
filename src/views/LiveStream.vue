@@ -1,15 +1,12 @@
 <template>
   <div id="stream-view">
     <div class="container-fluid mt-4">
-      <div v-if="channelInfoError" class="alert alert-danger">
-        This channel does not exist. Sorry about that.
-      </div>
       <div class="row content">
         <div class="col-md-8 col-12">
-          <VideoPlayer v-if="videoSource" :source="videoSource" :controllable="currentUserIsStreamMaster" @seek="playerSeek" @play="playerPlay" @pause="playerPause" @created="playerInstanceReady"></VideoPlayer>
+          <VideoPlayer v-if="videoSource" :source="videoSource" :controllable="currentUserIsStreamMaster" @created="playerInstanceReady"></VideoPlayer>
         </div>
         <div class="col-md-4 col-12">
-          <ChannelChat v-if="channelInfo" :channel="channelInfo._channelId" :via="chatChannel"></ChannelChat>
+          <ChannelChat v-if="chatConnected" :channel="streamId" :via="chatIo"></ChannelChat>
         </div>
       </div>
     </div>
@@ -17,6 +14,7 @@
 </template>
 
 <script>
+import io from 'socket.io-client';
 import http from '@/lib/http';
 import { mapGetters } from 'vuex';
 
@@ -26,13 +24,14 @@ const ChannelChat = () => import('@/components/chat/ChannelChat');
 export default {
   data () {
     return {
-      channelInfo: null,
-      channelInfoError: null,
-      socketRoomName: null,
-      clientIsMaster: false,
       playerInstance: null,
       clipUUID: null,
-      streamId: null
+      streamId: null,
+      streamReady: false,
+      streamEnded: false,
+      videoIo: null,
+      chatIo: null,
+      chatConnected: false
     };
   },
 
@@ -80,22 +79,33 @@ export default {
           vm.channelInfoError = err;
         });
       } else {
+        this.videoIo = io(`${this.apiHost}/${this.streamId}/video`, {
+          transports: ['websocket']
+        });
+        this.chatIo = io(`${this.apiHost}/${this.streamId}/chat`, {
+          transports: ['websocket']
+        });
+
+        this.videoIo.on('connection', () => {
+          console.debug('Video socket connected');
+        }).on('streaming', () => {
+          vm.streamReady = true;
+        }).on('disconnect', () => {
+          vm.streamReady = false;
+        }).on('closing', () => {
+          vm.streamEnded = true;
+        });
+
+        this.chatIo.on('connect', () => {
+          vm.chatConnected = true;
+        }).on('disconnect', () => {
+          vm.chatConnected = false;
+        });
+
         if (next) {
           next();
         }
       }
-    },
-
-    playerPlay () {
-      this.videoChannel.emit('play', this.room);
-    },
-
-    playerPause () {
-      this.videoChannel.emit('pause', this.room);
-    },
-
-    playerSeek () {
-      this.videoChannel.emit('seeked', this.room, this.playerInstance.currentTime);
     },
   },
 
@@ -105,18 +115,10 @@ export default {
     },
 
     videoSource () {
-      return this.clipUUID && this.streamId ? `${this.apiHost}/api/streaming/channels/${this.clipUUID}/${this.streamId}/manifest.m3u8` : null;
+      return this.clipUUID && this.streamId && this.streamReady ? `${this.apiHost}/api/streaming/channels/${this.clipUUID}/${this.streamId}/manifest.m3u8` : null;
     },
 
-    room () {
-      return this.channelInfo._channelId;
-    },
-
-    playable () {
-      return this.channelInfo && this.playerInstance;
-    },
-
-    ...mapGetters(['currentUser', 'videoChannel', 'chatChannel', 'apiHost'])
+    ...mapGetters(['currentUser', 'apiHost'])
   },
 
   components: { ChannelChat, VideoPlayer }

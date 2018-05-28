@@ -1,40 +1,22 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import http from '@/lib/http';
-import io from 'socket.io-client';
 import hosts from '@/hosts';
 
 Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    videoChannel: null,
-    chatChannel: null,
+    io: null,
     user: undefined,
     contextInitialized: false
   },
   mutations: {
-    setVideoSocket (state, instance) {
-      state.videoSocket = instance;
-    },
-
-    setChatSocket (state, instance) {
-      state.chatSocket = instance;
-    },
-
     setCurrentUser (state, user) {
       state.user = user;
     },
 
-    ioConnect (state) {
-      state.videoChannel = io(`${hosts.apiHost}/video`, {
-        transports: ['websocket']
-      });
-
-      state.chatChannel = io(`${hosts.apiHost}/chat`, {
-        transports: ['websocket'],
-        path: '/chat'
-      });
+    ioConnect () {
     }
   },
   actions: {
@@ -52,25 +34,17 @@ export default new Vuex.Store({
     login (context, credentials) {
       return http.post('/api/auth/login', credentials).then(res => {
         context.commit('setCurrentUser', res.data);
-        context.state.videoChannel.emit('authenticate', context.state.user.id);
         return res.data;
       });
     },
 
-    ioConnect ({ commit, state }) {
+    ioConnect ({ commit }) {
       commit('ioConnect');
-      if (state.user !== null) {
-        state.videoChannel.emit('authenticate', state.user.id);
-      }
     }
   },
   getters: {
-    videoSocket (state) {
-      return state.videoSocket
-    },
-
-    chatSocket (state) {
-      return state.chatSocket
+    io (state) {
+      return state.io;
     },
 
     currentUser (state) {
@@ -79,14 +53,6 @@ export default new Vuex.Store({
 
     contextInitialized (state) {
       return state.contextInitialized;
-    },
-
-    videoChannel (state) {
-      return state.videoChannel;
-    },
-
-    chatChannel (state) {
-      return state.chatChannel;
     },
 
     apiHost () {
