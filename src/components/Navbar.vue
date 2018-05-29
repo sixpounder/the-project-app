@@ -1,5 +1,5 @@
 <template>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
     <router-link class="navbar-brand" :to="{ name: 'home' }">
       TheProject
     </router-link>

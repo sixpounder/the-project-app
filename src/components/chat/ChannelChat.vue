@@ -3,11 +3,7 @@
     <div class="messages">
       <ul class="list-unstyled">
         <li class="media" v-for="message in messageBuffer" :key="message.id">
-          <img :src="avatar(message.user.email)" />
-          <div class="media-body">
-            <h5 class="mt-0 mb-1">{{ message.user.identifier }}</h5>
-            <span>{{ message.msg }}</span>
-          </div>
+          <Message :model="message"></Message>
         </li>
       </ul>
     </div>
@@ -16,6 +12,8 @@
 </template>
 
 <script>
+const Message = () => import('@/components/chat/Message');
+
 export default {
   props: ['channel', 'via'],
 
@@ -28,12 +26,18 @@ export default {
   },
 
   mounted () {
-    const vm = this;
     console.debug('Will join chat room ' + this.channel);
-    this.via.on('connection', function(otherClients) {
-      vm.clients = otherClients;
-      vm.via.on('message', (msg) => {
-        vm.messageBuffer.push(msg);
+    this.via.on('connection', (socket) => {
+      socket.on('message', (msg) => {
+        this.messageBuffer.push({ type: 'message', payload: msg });
+      });
+
+      socket.on('user-left', (userWhoLeft) => {
+        this.messageBuffer.push({ type: 'user-left', payload: userWhoLeft });
+      });
+
+      socket.on('user-joined', (userWhoJoined) => {
+        this.messageBuffer.push({ type: 'user-joined', payload: userWhoJoined });
       });
     });
   },
@@ -48,6 +52,10 @@ export default {
         console.debug('Message sent');
       });
     }
+  },
+
+  components: {
+    Message
   }
 }
 </script>

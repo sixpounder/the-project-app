@@ -3,6 +3,18 @@
     <div class="container-fluid mt-4">
       <div class="row content">
         <div class="col-md-8 col-12">
+          <div v-if="streamWaiting" class="d-flex flex-column justify-content-center align-items-center">
+            <h1>
+              <font-awesome-icon icon="circle-notch" spin></font-awesome-icon>
+            </h1>
+            <h4>Stream is loading, stand by</h4>
+          </div>
+          <div v-if="streamEnded" class="d-flex flex-column justify-content-center align-items-center">
+            <h1>
+              <font-awesome-icon icon="hand-spock"></font-awesome-icon>
+            </h1>
+            <h4>Stream has ended, long live and prosper</h4>
+          </div>
           <VideoPlayer v-if="videoSource" :source="videoSource" @created="playerInstanceReady"></VideoPlayer>
         </div>
         <div class="col-md-4 col-12">
@@ -12,7 +24,7 @@
           </div>
 
           <div class="text-center" v-if="chatDisconnected">
-            <font-awesome-icon icon="frown" spin></font-awesome-icon>
+            <font-awesome-icon icon="frown"></font-awesome-icon>
             <span class="ml-2">Disconnected from channel chat</span>
           </div>
 
@@ -37,8 +49,7 @@ export default {
       playerInstance: null,
       clipUUID: null,
       streamId: null,
-      streamReady: false,
-      streamEnded: false,
+      streamStatus: 'waiting',
       videoIo: null,
       chatIo: null,
       chatStatus: 'connecting'
@@ -98,12 +109,13 @@ export default {
 
         this.videoIo.on('connection', () => {
           console.debug('Video socket connected');
+          vm.streamStatus = 'waiting';
         }).on('streaming', () => {
-          vm.streamReady = true;
+          vm.streamStatus = 'ready';
         }).on('disconnect', () => {
-          vm.streamReady = false;
+          vm.streamStatus = 'disconnected';
         }).on('closing', () => {
-          vm.streamEnded = true;
+          vm.streamStatus = 'closing';
         });
 
         this.chatIo.on('connect', () => {
@@ -137,6 +149,18 @@ export default {
 
     videoSource () {
       return this.clipUUID && this.streamId && this.streamReady ? `${this.apiHost}/api/streaming/channels/${this.clipUUID}/${this.streamId}/manifest.m3u8` : null;
+    },
+
+    streamWaiting () {
+      return this.streamStatus === 'waiting';
+    },
+
+    streamReady () {
+      return this.streamStatus === 'ready';
+    },
+
+    streamEnded () {
+      return this.streamStatus === 'closing' || this.streamStatus === 'disconnected';
     },
 
     ...mapGetters(['currentUser', 'apiHost'])
