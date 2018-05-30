@@ -3,7 +3,7 @@
     <div class="messages">
       <ul class="list-unstyled">
         <li class="media" v-for="message in messageBuffer" :key="message.id">
-          <Message :model="message"></Message>
+          <Message :message="message"></Message>
         </li>
       </ul>
     </div>
@@ -21,34 +21,34 @@ export default {
     return {
       message: '',
       clients: [],
+      socket: null,
       messageBuffer: []
     };
   },
 
   mounted () {
-    console.debug('Will join chat room ' + this.channel);
-    this.via.on('connection', (socket) => {
-      socket.on('message', (msg) => {
-        this.messageBuffer.push({ type: 'message', payload: msg });
-      });
+    const vm = this;
+    vm.socket = vm.via;
+    vm.socket.on('message', (msg) => {
+      vm.messageBuffer.push({ type: 'message', payload: msg });
+    });
 
-      socket.on('user-left', (userWhoLeft) => {
-        this.messageBuffer.push({ type: 'user-left', payload: userWhoLeft });
-      });
+    vm.socket.on('user-left', (userWhoLeft) => {
+      vm.messageBuffer.push({ type: 'user-left', payload: userWhoLeft });
+    });
 
-      socket.on('user-joined', (userWhoJoined) => {
-        this.messageBuffer.push({ type: 'user-joined', payload: userWhoJoined });
-      });
+    vm.socket.on('user-joined', (userWhoJoined) => {
+      vm.messageBuffer.push({ type: 'user-joined', payload: userWhoJoined });
     });
   },
 
   beforeDestroy () {
-    this.via.disconnect();
+    this.socket.disconnect();
   },
 
   methods: {
     sendMessage () {
-      this.via.emit('message', this.message, function() {
+      this.socket.emit('message', this.message, function() {
         console.debug('Message sent');
       });
     }

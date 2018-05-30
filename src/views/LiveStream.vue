@@ -107,7 +107,7 @@ export default {
           transports: ['websocket']
         });
 
-        this.videoIo.on('connection', () => {
+        this.videoIo.on('connect', () => {
           console.debug('Video socket connected');
           vm.streamStatus = 'waiting';
         }).on('streaming', () => {

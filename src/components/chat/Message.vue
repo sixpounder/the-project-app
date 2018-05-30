@@ -25,8 +25,9 @@
 const Avatar = () => import('vue-gravatar');
 
 export default {
+  props: ['message'],
   components: {
     Avatar
-  }  
+  }
 }
 </script>
