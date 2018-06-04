@@ -1,7 +1,7 @@
 <template>
   <div id="stream-view">
     <div class="container-fluid mt-4">
-      <div class="row content">
+      <div class="row content" v-if="! stillConverting">
         <div class="col-md-8 col-12">
           <div v-if="streamWaiting" class="d-flex flex-column justify-content-center align-items-center">
             <h1>
@@ -31,6 +31,11 @@
           <ChannelChat v-if="chatConnected" :channel="streamId" :via="chatIo"></ChannelChat>
         </div>
       </div>
+      
+      <div v-if="stillConverting">
+        <img class="img-fluid" src="../assets/monkey.png" />
+        <h3>Your video is still being converted</h3>
+      </div>
     </div>
   </div>
 </template>
@@ -52,7 +57,8 @@ export default {
       streamStatus: 'waiting',
       videoIo: null,
       chatIo: null,
-      chatStatus: 'connecting'
+      chatStatus: 'connecting',
+      stillConverting: false
     };
   },
 
@@ -91,45 +97,57 @@ export default {
       this.clipUUID = to.params.id;
       this.streamId = to.params.stream;
 
-      if (! this.streamId) {
-        // Create the stream
-        http.post(`/api/streaming/channels/${vm.clipUUID}`).then(res => {
-          const newStreamId = res.data.streamId;
-          vm.$router.replace({ name: 'stream', params: { id: vm.clipUUID, stream: newStreamId }});
-        }).catch(err => {
-          vm.channelInfoError = err;
-        });
-      } else {
-        this.videoIo = io(`${this.apiHost}/${this.streamId}/video`, {
-          transports: ['websocket']
-        });
-        this.chatIo = io(`${this.apiHost}/${this.streamId}/chat`, {
-          transports: ['websocket']
-        });
+      http.get(`/api/streaming/channels/${vm.clipUUID}`).then(res => {
+        if (res.status === 202) {
+          // Video is still converting
+          this.stillConverting = true;
+        } else if (res.status === 200) {
+          // Video available
+          if (! this.streamId) {
+            // Create the stream
+            http.post(`/api/streaming/channels/${vm.clipUUID}`).then(res => {
+              const newStreamId = res.data.streamId;
+              vm.$router.replace({ name: 'stream', params: { id: vm.clipUUID, stream: newStreamId }});
+            }).catch(err => {
+              vm.channelInfoError = err;
+            });
+          } else {
+            this.videoIo = io(`${this.apiHost}/${this.streamId}/video`, {
+              transports: ['websocket']
+            });
+            this.chatIo = io(`${this.apiHost}/${this.streamId}/chat`, {
+              transports: ['websocket']
+            });
 
-        this.videoIo.on('connect', () => {
-          console.debug('Video socket connected');
-          vm.streamStatus = 'waiting';
-        }).on('streaming', () => {
-          vm.streamStatus = 'ready';
-        }).on('disconnect', () => {
-          vm.streamStatus = 'disconnected';
-        }).on('closing', () => {
-          vm.streamStatus = 'closing';
-        });
+            this.videoIo.on('connect', () => {
+              console.debug('Video socket connected');
+              vm.streamStatus = 'waiting';
+            }).on('streaming', () => {
+              vm.streamStatus = 'ready';
+            }).on('disconnect', () => {
+              vm.streamStatus = 'disconnected';
+            }).on('closing', () => {
+              vm.streamStatus = 'closing';
+            });
 
-        this.chatIo.on('connect', () => {
-          vm.chatStatus = 'connected';
-        }).on('connecting', () => {
-          vm.chatStatus = 'connecting';
-        }).on('disconnect', () => {
-          vm.chatStatus = 'disconnected';
-        });
+            this.chatIo.on('connect', () => {
+              vm.chatStatus = 'connected';
+            }).on('connecting', () => {
+              vm.chatStatus = 'connecting';
+            }).on('disconnect', () => {
+              vm.chatStatus = 'disconnected';
+            });
 
-        if (next) {
-          next();
+            if (next) {
+              next();
+            }
+          }
+        } else {
+          // TODO: Show a "not found" alert or something like that
         }
-      }
+      });
+
+      
     },
   },
 
