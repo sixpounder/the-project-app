@@ -15,7 +15,11 @@
             </h1>
             <h4>Stream has ended, long live and prosper</h4>
           </div>
-          <VideoPlayer v-if="videoSource" :source="videoSource" @created="playerInstanceReady"></VideoPlayer>
+          <div v-if="videoSource">
+            <VideoPlayer :source="videoSource" @created="playerInstanceReady"></VideoPlayer>
+            <h3 class="mt-4">{{ clip.title }}</h3>
+            <p>Uploaded by <strong>{{ clip.uploader.identifier}}</strong></p>
+          </div>
         </div>
         <div class="col-md-4 col-12">
           <div class="text-center" v-if="chatConnecting">
@@ -54,6 +58,7 @@ export default {
     return {
       playerInstance: null,
       clipUUID: null,
+      clip: null,
       streamId: null,
       streamStatus: 'waiting',
       videoIo: null,
@@ -113,6 +118,8 @@ export default {
               vm.channelInfoError = err;
             });
           } else {
+            this.clip = res.data.details;
+
             this.videoIo = io(`${this.apiHost}/${this.streamId}/video`, {
               transports: ['websocket']
             });

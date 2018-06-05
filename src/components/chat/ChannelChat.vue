@@ -1,19 +1,26 @@
 <template>
   <div class="channel-chat">
-    <div class="messages">
-      <ul class="list-unstyled">
-        <li class="media" v-for="message in messageBuffer" :key="message.id">
-          <Message :message="message"></Message>
-        </li>
-      </ul>
+    <div class="chat-container" v-if="currentUser">
+      <div class="messages">
+        <ul class="list-unstyled">
+          <li class="media" v-for="message in messageBuffer" :key="message.id">
+            <Message :message="message"></Message>
+          </li>
+        </ul>
+      </div>
+      <div class="message-input">
+        <input class="form-control input-sm" v-model="message" @keyup.enter="sendMessage" />
+      </div>
     </div>
-    <div class="message-input">
-      <input class="form-control input-sm" v-model="message" @keyup.enter="sendMessage" />
+    <div class="alert alert-info" v-else>
+      Login to join channel chat
     </div>
   </div>
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
+
 const Message = () => import('@/components/chat/Message');
 
 export default {
@@ -53,6 +60,10 @@ export default {
       this.socket.emit('message', this.message);
       this.message = '';
     }
+  },
+
+  computed: {
+    ...mapGetters(['currentUser'])
   },
 
   components: {
