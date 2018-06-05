@@ -1,6 +1,6 @@
 <template>
   <div class="player" v-if="source">
-    <video autoplay="true" class="videoplayer" ref="videoplayer"></video>
+    <video autoplay="true" controls class="videoplayer" ref="videoplayer"></video>
   </div>
 </template>
 
@@ -16,7 +16,8 @@ export default {
       progressPercentage: 0,
       timeElapsed: 0,
       totalTime: 0,
-      playerState: 'paused'
+      playerState: 'paused',
+      hls: null
     };
   },
 
@@ -28,12 +29,12 @@ export default {
 
     const vm = this;
     if(Hls.isSupported()) {
-      const hls = new Hls({
+      this.hls = new Hls({
         manifestLoadingTimeOut: 30000
       });
-      hls.loadSource(this.source);
-      hls.attachMedia(this.$refs.videoplayer);
-      hls.on(Hls.Events.MANIFEST_PARSED, function() {
+      this.hls.loadSource(this.source);
+      this.hls.attachMedia(this.$refs.videoplayer);
+      this.hls.on(Hls.Events.MANIFEST_PARSED, () => {
         vm.$refs.videoplayer.play();
       });
     }

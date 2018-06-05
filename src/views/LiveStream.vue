@@ -32,9 +32,10 @@
         </div>
       </div>
       
-      <div v-if="stillConverting">
+      <div v-if="stillConverting" class="d-flex align-items-center flex-column">
         <img class="img-fluid" src="../assets/monkey.png" />
         <h3>Your video is still being converted</h3>
+        <p>Refresh this page in a few moments, thank you</p>
       </div>
     </div>
   </div>

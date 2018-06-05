@@ -7,7 +7,9 @@
         </li>
       </ul>
     </div>
-    <input class="form-control input-sm" v-model="message" @keyup.enter="sendMessage" />
+    <div class="message-input">
+      <input class="form-control input-sm" v-model="message" @keyup.enter="sendMessage" />
+    </div>
   </div>
 </template>
 
@@ -48,9 +50,8 @@ export default {
 
   methods: {
     sendMessage () {
-      this.socket.emit('message', this.message, function() {
-        console.debug('Message sent');
-      });
+      this.socket.emit('message', this.message);
+      this.message = '';
     }
   },
 
