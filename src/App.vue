@@ -23,8 +23,7 @@ export default {
 
     ...mapActions(['ioConnect', 'initializeUserContext'])
   },
-  
+
   components: { Navbar, UserContextProvider }
 }
 </script>
-

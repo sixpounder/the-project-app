@@ -2,7 +2,7 @@
   <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
     <router-link class="navbar-brand" :to="{ name: 'home' }">
       <img src="../assets/monkey-small.png" />
-      <span class="ml-2 d-none d-md-inline">Stream Now</span>
+      <span class="ml-2 d-none d-md-inline">NowStream</span>
     </router-link>
     <!-- <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
