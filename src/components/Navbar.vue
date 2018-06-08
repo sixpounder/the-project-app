@@ -48,3 +48,16 @@ export default {
 }
 </script>
 
+<style lang="scss" scoped>
+  nav .navbar-nav {
+    flex-direction: row;
+
+    li {
+      margin-left: 1em;
+
+      &:first-child {
+        margin-left: 0;
+      }
+    }
+  }
+</style>
