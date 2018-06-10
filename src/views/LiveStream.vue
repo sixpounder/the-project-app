@@ -18,7 +18,7 @@
           <div v-if="videoSource">
             <VideoPlayer :source="videoSource" @created="playerInstanceReady"></VideoPlayer>
             <h3 class="mt-4">{{ clip.title }}</h3>
-            <p>Uploaded by <strong>{{ clip.uploader.identifier}}</strong></p>
+            <p>Uploaded by <strong>{{ clip.uploader.identifier}}</strong> {{ clip.createdAt | timeElapsed }}</p>
           </div>
         </div>
         <div class="col-md-4 col-12">

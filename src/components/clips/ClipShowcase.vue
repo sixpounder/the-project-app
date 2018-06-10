@@ -2,7 +2,7 @@
   <div class="clips-showcase">
     <div class="row">
       <div class="col-6 col-md-4 col-lg-3" v-for="clip in clips" :key="clip.uuid">
-        <ClipShowcaseItem :clip="clip"></ClipShowcaseItem>
+        <ClipShowcaseItem class="mt-2" :clip="clip"></ClipShowcaseItem>
       </div>
     </div>
   </div>
