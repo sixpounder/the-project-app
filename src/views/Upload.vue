@@ -8,6 +8,10 @@
           <input type="text" class="form-control" v-model="clip.title">
         </FormGroup>
         <FormGroup>
+          <label class="control-label">Description</label>
+          <textarea class="form-control" v-model="clip.description" />
+        </FormGroup>
+        <FormGroup>
           <button @click="onFileSelectTrigger" class="btn btn-outline-info">
             <span>Select file</span>
           </button>
@@ -45,6 +49,7 @@ export default {
     return {
       clip: {
         title: null,
+        description: null,
         clipData: null
       },
       progress: {
@@ -83,6 +88,7 @@ export default {
       const vm = this;
       let data = new FormData();
       data.append('title', this.clip.title);
+      data.append('description', this.clip.description);
       data.append('media', this.clip.clipData, this.clip.filename)
       
       http.post('/api/content/upload', data, {

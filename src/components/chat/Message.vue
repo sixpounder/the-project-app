@@ -1,6 +1,6 @@
 <template>
   <div class="media message-wrapper">
-    <Avatar email="message.payload.from.email" class="pr-3" :size="48"/>
+    <Avatar :email="message.payload.from.email" class="pr-3" :size="48"/>
     <div class="media-body">
       <h5 class="mt-0 mb-1">{{ message.payload.from.identifier }}</h5>
       <span>{{ message.payload.msg }}</span>

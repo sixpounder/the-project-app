@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 import Vue from 'vue'
 import Vuex from 'vuex'
 import http from '@/lib/http';
@@ -35,6 +37,15 @@ export default new Vuex.Store({
       return http.post('/api/auth/login', credentials).then(res => {
         context.commit('setCurrentUser', res.data);
         return res.data;
+      });
+    },
+
+    logout (context) {
+      return http.get('/api/auth/logout').then(() => {
+        context.commit('setCurrentUser', null);
+      }).catch((err) => {
+        // TODO: Show logout error
+        console.error(err);
       });
     },
 

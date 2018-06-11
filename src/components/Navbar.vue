@@ -18,7 +18,11 @@
         <li class="nav-item">
           <a href="#" class="nav-link">
             {{ currentUser.identifier }}
-            <font-awesome-icon icon="chevron-down"></font-awesome-icon>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#" class="nav-link" @click="signout">
+            <font-awesome-icon icon="sign-out-alt"></font-awesome-icon>
           </a>
         </li>
       </ul>
@@ -39,9 +43,17 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 
 export default {
+  methods: {
+    signout () {
+      this.logout().then(() => {
+        this.$router.replace({ name: 'home' });
+      });
+    },
+    ...mapActions(['logout'])
+  },
   computed: {
     ...mapGetters(['currentUser'])
   }
