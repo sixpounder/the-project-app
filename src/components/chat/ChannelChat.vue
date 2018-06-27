@@ -1,7 +1,7 @@
 <template>
   <div class="channel-chat">
     <div class="chat-container" v-if="currentUser">
-      <div class="messages">
+      <div class="messages" ref="chatContainer">
         <ul class="list-unstyled">
           <li class="media" v-for="message in messageBuffer" :key="message.id">
             <Message :message="message"></Message>
@@ -40,6 +40,9 @@ export default {
     vm.socket = vm.via;
     vm.socket.on('message', (msg) => {
       vm.messageBuffer.push({ type: 'message', payload: msg });
+      this.$nextTick(() => {
+        vm.$refs.chatContainer.scrollTop = vm.$refs.chatContainer.scrollHeight;
+      });
     });
 
     vm.socket.on('user-left', (userWhoLeft) => {
