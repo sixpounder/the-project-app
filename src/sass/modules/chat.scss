@@ -1,6 +1,10 @@
 .channel-chat {
+  height: 100%;
   .chat-container {
+    height: 100%;
     .messages {
+      max-height: calc(100% - 50px);
+      height: 90%;
       background-color: $gray-300;
       overflow-x: hidden;
       overflow-y: auto;
@@ -12,19 +16,11 @@
     }
   
     .message-input {
+      height: 50px;
       padding: 1em 2em;
       display: flex;
       align-items: center;
       background-color: $gray-600;
-    }
-    @media screen and (min-width: map-get($grid-breakpoints, 'lg')) {
-      height: calc(100vh - 100px);
-      .messages {
-        height: 90%;
-      }
-      .message-input {
-        height: 10%;
-      }  
     }
   }
   

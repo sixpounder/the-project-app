@@ -2,7 +2,7 @@
   <div id="stream-view">
     <div class="container-fluid mt-4">
       <div class="row content" v-if="! stillConverting">
-        <div class="col-md-8 col-12">
+        <div class="col-md-8 col-12 video-layout">
           <div v-if="streamWaiting" class="d-flex flex-column justify-content-center align-items-center">
             <h1>
               <font-awesome-icon icon="circle-notch" spin></font-awesome-icon>
@@ -21,7 +21,7 @@
             <p>Uploaded by <strong>{{ clip.uploader.identifier}}</strong> {{ clip.createdAt | timeElapsed }}</p>
           </div>
         </div>
-        <div class="col-md-4 col-12">
+        <div class="col-md-4 col-12 chat-layout">
           <div class="text-center" v-if="chatConnecting">
             <font-awesome-icon icon="circle-notch" spin></font-awesome-icon>
             <span class="ml-2">Connecting to channel chat</span>

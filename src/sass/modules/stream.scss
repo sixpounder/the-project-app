@@ -7,4 +7,20 @@
       width: 100%;
     }
   }
+
+  .video-layout {
+    height: calc(55vh);
+    max-height: calc(55vh);
+  }
+
+  .chat-layout {
+    height: calc(45vh - 100px);
+    max-height: calc(45vh - 100px);
+  }
+  .video-layout, .chat-layout {
+    @media screen and (min-width: map-get($grid-breakpoints, 'md')) {
+      height: calc(100vh - 100px);
+      max-height: calc(100vh - 100px);
+    }
+  }
 }
